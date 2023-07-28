@@ -20,7 +20,7 @@ python main.py \
 	"-1 0 0" "0 0 1" "output.obj"
 ```
 
-There's also the optional arguments:
+There are also optional arguments:
 
 |Short form|Long form|Description|Default Value|
 |-|-|-|-|
@@ -46,3 +46,17 @@ There's also the optional arguments:
 |``-cpu``|``--cpu``|Forces script to use the CPU instead of GPU|
 |``-fb``|``--filltobounds``|Reshapes sphere before optimisation to size of standard deviation|
 |``-rm``|``--raymarching``|Uses raymarching to initialise the starting sphere before any optimisation occurs|
+
+# Visualization
+
+You can run the Python script ```visualize.py``` to obtain a 3D visualization of the optimization!!
+Example of use:
+
+```sh
+python visualize.py volume_0_reconstruction.npy volume_1_reconstruction.npy ... volume_n_reconstruction.npy -p " -1,2,3" "0,0,0" -m mesh1.obj mesh2.obj ... meshn.obj
+```
+This will plot all the reconstructed volume values, with two points placed at (-1, 2, 3) and (0,0,0), with a mesh from 1 to n, that can be selected with a slider.
+
+Library requirements:
+* pyvista>=0.41.1
+* numpy>=1.23.3
