@@ -5,6 +5,7 @@ import vtk
 
 import argparse
 import sys
+import os
 
 import re
 
@@ -23,8 +24,8 @@ def parse_arguments(args):
     argp.add_argument('volume',  nargs = '+', type=str,
                       help='File list of the reconstructions to be plot in the visualization')
 
-    argp.add_argument('-m', '--meshes', nargs='+', type=str,
-                      help='List of file of meshes that will be plot iterative in the visualization')
+    argp.add_argument('-m', '--meshes_dir', type=str,
+                      help='Dir of the meshes that will be plot iterative in the visualization')
     
     argp.add_argument('-p', '--points', nargs = '+', type=coords,
                       help = 'Coordinate points to be plotted in the 3D volume')
@@ -76,9 +77,10 @@ def main(args):
                      opacity = 0.8)
 
     # Plot the meshes
-    if param.meshes is not None:
-        objs_sorted = sort_filenames(param.meshes)
-        meshes = list(map(lambda mesh: load_obj(mesh), objs_sorted))
+    if param.meshes_dir is not None:
+        meshes_files = os.listdir(param.meshes_dir)
+        objs_sorted = sort_filenames(meshes_files)
+        meshes = list(map(lambda obj: load_obj(param.meshes_dir + obj), objs_sorted))
         def update_geometry(slider_value):
             mesh = meshes[int(round(slider_value))]
             p.add_mesh(mesh, color= '#00FFFF', opacity=0.6, name='geometry_mesh')

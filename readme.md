@@ -53,9 +53,9 @@ You can run the Python script ```visualize.py``` to obtain a 3D visualization of
 Example of use:
 
 ```sh
-python visualize.py volume_0_reconstruction.npy volume_1_reconstruction.npy ... volume_n_reconstruction.npy -p " -1,2,3" "0,0,0" -m mesh1.obj mesh2.obj ... meshn.obj
+python visualize.py volume_0_reconstruction.npy volume_1_reconstruction.npy ... volume_n_reconstruction.npy -p " -1,2,3" "0,0,0" -m mesh/dir/
 ```
-This will plot all the reconstructed volume values, with two points placed at (-1, 2, 3) and (0,0,0), with a mesh from 1 to n, that can be selected with a slider.
+This will plot all the reconstructed volume values, with two points placed at (-1, 2, 3) and (0,0,0), with a mesh from the mesh/dir/ directory selected iteratively with a slider.
 
 Library requirements:
 * pyvista>=0.41.1
