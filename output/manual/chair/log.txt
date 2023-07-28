@@ -1,16 +1,16 @@
-Volume 1: 'data/wall_cozy_chair/wall_cozy_chair_0.0_rec.npy', Volume 2: 'data/wall_cozy_chair/wall_cozy_chair_90.0_to_0.0_rec.npy'
+Volume 1: '../nlos_multiwall/results/multiwall_combinations/wall_cozy_chair/wall_cozy_chair_0.0_rec.npy', Volume 2: '../nlos_multiwall/results/multiwall_combinations/wall_cozy_chair/wall_cozy_chair_90.0_to_0.0_rec.npy'
 Normal 1: '-1 0 0', Normal 2: '0 0 1'
 Output: 'output/manual/chair/model.obj', Force CPU?: False
-Iterations: 125, Subdivisions: 4
-Room radius: 4.0, Weight Normals: 1.0, Weight Values: 1.0
+Iterations: 30, Subdivisions: 4
+Room radius: 4.0, Weight Normals: 0.0, Weight Values: 1.0
 Weight Proximity: 0, Weight Neighbours: 0
-Weight Edges Similarity: 100.0
-Weight LODs: (8.0, 4.0, 2.0, 1.0)
-Initialisation: Raymarching
+Weight Edges Similarity: 0.0
+Weight LODs: (1.0, 0.0, 0.0, 1.0)
+Initialisation: Center of Mass
 Saving sequence on directory 'output/manual/chair/seq'
 ---------------
-Time to load volumes: 0.45439743995666504s
+Time to load volumes: 0.3713111877441406s
 Using GPU
-Time for blurring: 27.4597589969635s
-Time for optimising: 2031.788865327835s
-Time for optimising (Average per iteration): 16.25431092262268s
+Time for blurring: 33.363362312316895s
+Time for optimising: 596.8248529434204s
+Time for optimising (Average per iteration): 19.89416176478068s

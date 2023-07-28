@@ -8,8 +8,8 @@ import scipy.ndimage as ndi
 # Initialise sphere
 #
 
-def initialise_standard(p, V0, V1, room_length):
-	barycenter = centerOfMass(V0, V1, room_length)
+def initialise_standard(p, V0, V1):
+	barycenter = centerOfMass(V0, V1)
 	print(f"Initialising sphere with center of mass {barycenter}")
 	
 	return p + barycenter[:, np.newaxis]
@@ -34,7 +34,7 @@ def initialise_raymarching(p, V0, V1, room_length, march_divisions=32):
 	raymarched_points += mu.reshape(-1,1)
 
 	# Values for every point in the raymarching. Rows indicate point, column raymarched interation
-	values = optimisation.sampleVolume(V, raymarched_points, room_length)
+	values = optimisation.sampleVolume(V, raymarched_points)
 	values *= (1-delta/dmax) * (1-delta/dmax) # Give less importance to values far from the center
 	values = values.reshape(-1, march_divisions)
 
@@ -49,12 +49,9 @@ def initialise_raymarching(p, V0, V1, room_length, march_divisions=32):
 # Calculate center of mass
 #
 
-def centerOfMass(V0, V1, room_length):
-	c0 = np.asarray(ndi.center_of_mass(V0))
-	c1 = np.asarray(ndi.center_of_mass(V1))
-	c = (c0 + c1) / 2
-
-	return (2 * (c / 256) - 1) * room_length * 1
+def centerOfMass(V0, V1):
+	c = np.asarray(ndi.center_of_mass(V0 + V1))
+	return (2 * (c / 256) - 1)
 
 def centerOfMassAndDeviation(V0, V1, room_length):
 	res = V0.shape[0]
