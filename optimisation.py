@@ -9,6 +9,7 @@ import torch
 import matplotlib.pyplot as plt
 
 from scipy.interpolate import interpn
+import scipy.interpolate as sc_intp
 
 import subsphere_ico
 
@@ -16,7 +17,7 @@ from tqdm import tqdm
 
 import tal
 
-samplingPosition = (np.linspace(0, 255, 256), np.linspace(0, 255, 256), np.linspace(0, 255, 256))
+samplingPosition = (np.linspace(-1, 1, 256), np.linspace(-1, 1, 256), np.linspace(-1, 1, 256))
 
 #
 # Try cube
@@ -40,8 +41,8 @@ def optimizeSphere(input_x, input_n, input_neighbours, V0, V1, input_Vn0, input_
 	global samplingPosition
 
 	res = V0.shape[0]
-	x = np.copy(input_x)
-	samplingPosition = (np.linspace(0, res - 1, res), np.linspace(0, res - 1, res), np.linspace(0, res - 1, res))
+	x = torch.from_numpy(np.copy(input_x))
+	# samplingPosition = (np.linspace(-1, 1, res), np.linspace(-1, 1, res), np.linspace(-1, 1, res))
 
 	print(f"Checking for device...", end='', flush=True)
 	dev = torch.device('cpu' if (not torch.cuda.is_available() or args.cpu) else 'cuda')
@@ -50,11 +51,20 @@ def optimizeSphere(input_x, input_n, input_neighbours, V0, V1, input_Vn0, input_
 	n = torch.from_numpy(input_n.astype('float64')).to(dev)
 	Vn0 = torch.from_numpy(input_Vn0.astype('float64')).to(dev)
 	Vn1 = torch.from_numpy(input_Vn1.astype('float64')).to(dev)
-	neighbours = torch.clone(input_neighbours).to(dev)
+	neighbours = torch.argwhere(input_neighbours).to(dev)
+
+	V0_interp = sc_intp.RegularGridInterpolator(samplingPosition,
+					     						V0,
+												bounds_error=False,
+												fill_value = 0)
+	V1_interp = sc_intp.RegularGridInterpolator(samplingPosition,
+					     						V1,
+												bounds_error=False,
+												fill_value = 0)
 
 	print(f"Optimising sphere to voxel data for {args.iterations} iterations:")
 	for i in tqdm(range(args.iterations)):
-		res = opt.minimize(powerSphere, [x], args=(dev, n, neighbours, V0, V1, Vn0, Vn1, args), method='CG',
+		res = opt.minimize(powerSphere, x.reshape(-1), args=(dev, n, neighbours, V0_interp, V1_interp, Vn0, Vn1, args), method='CG',
 			options={'disp': False, "maxiter": 1}, jac='3-point') #jac=jac_function
 		x = unpack(res.x)
 		if args.sequence is not None:
@@ -62,15 +72,24 @@ def optimizeSphere(input_x, input_n, input_neighbours, V0, V1, input_Vn0, input_
 
 	return x, n
 
-def powerSphere(data, device, n, neighbours, V0, V1, Vn0, Vn1, args):
+def powerSphere(data, device, n, neighbours, V0_interp, V1_interp, Vn0, Vn1, args):
 	x = unpack(data)
-	x_torch = torch.from_numpy(x.T).to(device)
 
-	v0 = torch.from_numpy(sampleVolume(V0, x, args.roomsize)).to(device)
-	v1 = torch.from_numpy(sampleVolume(V1, x, args.roomsize)).to(device)
+	# Energy depending on the reconstruction value
+	v0 = V0_interp(x.T)
+	v1 = V1_interp(x.T)
 
-	eValue = torch.sum(args.weightvolume0 * v0 + args.weightvolume1 * v1, dim=0)
-	eValue = eValue.item()
+	eValue = np.sum(args.weightvolume0 * v0 + args.weightvolume1 * v1)
+
+	# Regularization based on the std of the distance between connected vertex
+	edges = x[:, neighbours]
+	edges_v = np.diff(edges, axis = 2)
+	# Square distance of all edges
+	sq_dists = np.sum(edges_v**2, axis = 0)
+	eEdges = np.std(sq_dists)
+
+	return -(args.weightvalues * eValue - args.weightedges * eEdges)
+
 
 	cos0 = (Vn0 @ n - 1) / 2
 	cos1 = (Vn1 @ n - 1) / 2
@@ -103,18 +122,12 @@ def powerSphere(data, device, n, neighbours, V0, V1, Vn0, Vn1, args):
 
 	return -(args.weightvalues * eValue + args.weightnormals * eNormal + args.weightproximity * eProximity - args.weightneighbours * eNeighbours - args.weightedges * eEdges)
 
-def sampleVolume(V, x, room_length):
+def sampleVolume(V, x):
 	global samplingPosition
-
-	res = V.shape[0]
-
-	uvw = res * (x / room_length + 1) / 2
-	return interpn(samplingPosition, V, uvw.T, bounds_error=False, fill_value=0)
+	return interpn(samplingPosition, V, x.T, bounds_error=False, fill_value=0)
 
 def unpack(data):
-	n = int(np.size(data))
-	s = (3, int(n/3))
-	return np.resize(data[0:n], s)
+	return data.reshape(3, -1)
 
 def minDistanceBetweenPoints(x):
 	dists = torch.cdist(x, x, p=1.0)

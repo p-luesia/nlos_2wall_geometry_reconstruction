@@ -72,11 +72,11 @@ def program(args, f=None):
 
 	# Initialise sphere position and size
 	if args.raymarching:
-		p = si.initialise_raymarching(p, V0, V1, args.roomsize)
+		p = si.initialise_raymarching(p, V0, V1)
 	elif args.filltobounds:
-		p = si.initialise_stdev(p, V0, V1, args.roomsize)
+		p = si.initialise_stdev(p, V0, V1)
 	else:
-		p = si.initialise_standard(p, V0, V1, args.roomsize)
+		p = si.initialise_standard(p, V0, V1)
 
 	#tal.plot.volume(V0 + V1)
 	#subsphere_ico.save_as_obj(p, args.subdivisions, 'output/TEMP2.obj')
