@@ -25,24 +25,21 @@ def initialise_stdev(p, V0, V1, room_length):
 def initialise_raymarching(p, V0, V1, march_divisions=32):
 	mu = centerOfMass(V0, V1)
 
-	dmax = 1 #Maximum possible distance between point and max volume value
+	dmax = 2 #Maximum possible distance between point and max volume value
 	V = V0 + V1
+	norm_p = p/np.linalg.norm(p,axis = 0)
 
-	delta = np.tile(dmax * np.linspace(0, 1, march_divisions)**2, p.shape[1])
-	raymarched_points = np.repeat(p, march_divisions, axis=1)
-	raymarched_points *= delta
-	raymarched_points += mu.reshape(-1,1)
+	delta = np.tile(dmax * np.linspace(0, 1, march_divisions)**2, (p.shape[1],1))
+	raymarched_points = delta[np.newaxis,:,:]*norm_p[:,:,np.newaxis]
+	raymarched_points += mu[:, np.newaxis, np.newaxis]
 
 	# Values for every point in the raymarching. Rows indicate point, column raymarched interation
-	values = optimisation.sampleVolume(V, raymarched_points)
-	values *= (1-delta/dmax) * (1-delta/dmax) # Give less importance to values far from the center
+	values = optimisation.sampleVolume(V, raymarched_points.reshape(3, -1))
 	values = values.reshape(-1, march_divisions)
+	values *= (1-delta/dmax)**2  # Give less importance to values far from the center
 
-	best_delta = dmax * (np.argmax(values, axis=1) / (march_divisions - 1))**2
-	best_delta_avg = np.sum(best_delta) / np.count_nonzero(best_delta)
-	best_delta = np.where(best_delta == 0, best_delta_avg, best_delta) #Make sure marched rays that don't detect any volume value don't stay at the very center
-	best_positions = (p * best_delta)# + mu.reshape(-1,1)
-
+	best_delta = np.argmax(values, axis=1)
+	best_positions = raymarched_points[:, np.arange(p.shape[1]), best_delta]
 	return best_positions
 
 #

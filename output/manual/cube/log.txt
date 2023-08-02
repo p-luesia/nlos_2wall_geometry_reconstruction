@@ -1,14 +1,16 @@
 Volume 1: '../nlos_multiwall/multiwall_combinations/cube/0.0_rec.npy', Volume 2: '../nlos_multiwall/multiwall_combinations/cube/90.0_to_0.0_rec.npy'
 Normal 1: '-1 0 0', Normal 2: '0 0 1'
 Output: 'output/manual/cube/model.obj', Force CPU?: False
-Iterations: 150, Subdivisions: 1
-Room radius: 4.0, Weight Normals: 0.0, Weight Values: 0.0
+Iterations: 300, Subdivisions: 2
+Room radius: 4.0, Weight Normals: 0.0, Weight Values: 1.0
 Weight Proximity: 0, Weight Neighbours: 0
-Weight Edges Similarity: 0.0
-Weight LODs: (8.0, 4.0, 2.0, 2.0)
+Weight Edges Similarity: 200.0
+Weight LODs: (8.0, 4.0, 2.0, 1.0)
 Initialisation: Raymarching
 Saving sequence on directory 'output/manual/cube/seq'
 ---------------
-Time to load volumes: 0.48400282859802246s
+Time to load volumes: 0.5500009059906006s
 Using CPU
-Time for blurring: 38.033682346343994s
+Time for blurring: 40.66813921928406s
+Time for optimising: 205.84762263298035s
+Time for optimising (Average per iteration): 0.6861587421099344s
